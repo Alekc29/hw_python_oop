@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Dict
+from dataclasses import asdict, dataclass
+from typing import Dict, Type, Union
 
 
 @dataclass
@@ -7,22 +7,18 @@ class InfoMessage:
     """Информационное сообщение о тренировке."""
     training_type: str
     duration: float
-    distance: float    # пройденная дистанция в км
-    speed: float       # средняя скорость в км/ч
-    calories: float    # потрачено ккал
-    info_msg: str = ('Тип тренировки: {0}; '
-                     'Длительность: {1:.3f} ч.; '
-                     'Дистанция: {2:.3f} км; '
-                     'Ср. скорость: {3:.3f} км/ч; '
-                     'Потрачено ккал: {4:.3f}.')
+    distance: float
+    speed: float
+    calories: float
+    info_msg: str = ('Тип тренировки: {training_type}; '
+                     'Длительность: {duration:.3f} ч.; '
+                     'Дистанция: {distance:.3f} км; '
+                     'Ср. скорость: {speed:.3f} км/ч; '
+                     'Потрачено ккал: {calories:.3f}.')
 
     def get_message(self) -> str:
         """Вернуть сообщение о тренировке в виде строки"""
-        return self.info_msg.format(self.training_type,
-                                    self.duration,
-                                    self.distance,
-                                    self.speed,
-                                    self.calories)
+        return self.info_msg.format(**asdict(self))
 
 
 class Training:
@@ -32,9 +28,9 @@ class Training:
     HOUR_IN_MINUT: int = 60
 
     def __init__(self,
-                 action: int,      # количество совершённых действий
-                 duration: float,  # длительность тренировки в часах
-                 weight: float     # вес спортсмена
+                 action: int,
+                 duration: float,
+                 weight: float
                  ) -> None:
         self.action = action
         self.duration_h = duration
@@ -84,7 +80,7 @@ class SportsWalking(Training):
                  action: int,
                  duration: float,
                  weight: float,
-                 height: int    # рост спортсмена
+                 height: int
                  ) -> None:
         super().__init__(action, duration, weight)
         self.height = height
@@ -107,8 +103,8 @@ class Swimming(Training):
                  action: int,
                  duration: float,
                  weight: float,
-                 length_pool: float,    # длина бассейна в метрах
-                 count_pool: int        # счётчик заплывов
+                 length_pool: float,
+                 count_pool: int
                  ) -> None:
         super().__init__(action, duration, weight)
         self.length_pool = length_pool
@@ -129,7 +125,9 @@ def read_package(workout_type: str,
                  data: list
                  ) -> Training:
     """Прочитать данные полученные от датчиков."""
-    training: Dict[str, Training] = {
+    training: Dict[str, Type[Union[Swimming,
+                                   Running,
+                                   SportsWalking]]] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
