@@ -131,10 +131,9 @@ def read_package(workout_type: str,
         'WLK': SportsWalking
     }
 
-    return training.get(
-        workout_type,
-        'Такого вида тренировки ещё нет =('
-    )(*data)
+    if workout_type in training:
+        return training[workout_type](*data)
+    return ('Такого вида тренировки ещё нет =(')
 
 
 def main(training: Training) -> None:
@@ -147,8 +146,12 @@ if __name__ == '__main__':
         ('SWM', [720, 1, 80, 25, 40]),
         ('RUN', [15000, 1, 75]),
         ('WLK', [9000, 1, 75, 180]),
+        ('BCL', [100, 1, 45])
     ]
 
     for workout_type, data in packages:
         training = read_package(workout_type, data)
-        main(training)
+        if type(training) != str:
+            main(training)
+        else:
+            print(training)
